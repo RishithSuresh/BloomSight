@@ -10,19 +10,30 @@
   <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
+<button class="sidebar-fab" id="sidebar-fab" type="button" hidden>
+  <span aria-hidden="true">☰</span>
+</button>
 <div class="app-shell">
   <aside class="sidebar" id="sidebar" aria-label="Project tabs">
     <div class="sidebar-head">
-      <div class="sidebar-brand">BloomSight</div>
       <button class="sidebar-toggle btn ghost" id="sidebar-toggle" type="button" aria-expanded="true">
-        Collapse
+        <span class="sidebar-toggle-icon" aria-hidden="true">◀</span>
+        <span class="sidebar-toggle-label">Collapse</span>
       </button>
     </div>
     <nav class="sidebar-tabs" aria-label="Sections">
-      <button class="sidebar-tab is-active" type="button" data-panel-target="input" aria-selected="true">Input</button>
-      <button class="sidebar-tab" type="button" data-panel-target="shares" aria-selected="false" disabled>Shares</button>
-      <button class="sidebar-tab" type="button" data-panel-target="reveal" aria-selected="false" disabled>Reveal</button>
-      <a class="sidebar-tab sidebar-link" href="/demo">Demo</a>
+      <button class="sidebar-tab is-active" type="button" data-panel-target="input" aria-selected="true">
+        <span class="tab-icon" aria-hidden="true">1</span><span class="tab-label">Input</span>
+      </button>
+      <button class="sidebar-tab" type="button" data-panel-target="shares" aria-selected="false" disabled>
+        <span class="tab-icon" aria-hidden="true">2</span><span class="tab-label">Shares</span>
+      </button>
+      <button class="sidebar-tab" type="button" data-panel-target="reveal" aria-selected="false" disabled>
+        <span class="tab-icon" aria-hidden="true">3</span><span class="tab-label">Reveal</span>
+      </button>
+      <a class="sidebar-tab sidebar-link" href="/demo">
+        <span class="tab-icon" aria-hidden="true">D</span><span class="tab-label">Demo</span>
+      </a>
     </nav>
     <div class="sidebar-note">
       Upload an image, generate shares, then switch panels to inspect the result.

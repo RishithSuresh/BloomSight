@@ -7,7 +7,18 @@
   const panelButtons = Array.prototype.slice.call(document.querySelectorAll("[data-panel-target]"));
   const sidebar = $("sidebar");
   const sidebarToggle = $("sidebar-toggle");
+  const sidebarFab = $("sidebar-fab");
   let activePanel = "input";
+
+  function setSidebarCollapsed(collapsed) {
+    sidebar.classList.toggle("is-collapsed", collapsed);
+    if (sidebarFab) sidebarFab.hidden = !collapsed;
+    const toggleLabel = sidebarToggle.querySelector(".sidebar-toggle-label");
+    const toggleIcon = sidebarToggle.querySelector(".sidebar-toggle-icon");
+    if (toggleLabel) toggleLabel.textContent = collapsed ? "Expand" : "Collapse";
+    if (toggleIcon) toggleIcon.textContent = collapsed ? "▶" : "◀";
+    sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+  }
 
   function syncPanelButtons() {
     panelButtons.forEach(function (button) {
@@ -35,10 +46,14 @@
   });
 
   sidebarToggle.addEventListener("click", function () {
-    const collapsed = sidebar.classList.toggle("is-collapsed");
-    sidebarToggle.textContent = collapsed ? "Expand" : "Collapse";
-    sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+    setSidebarCollapsed(!sidebar.classList.contains("is-collapsed"));
   });
+
+  if (sidebarFab) {
+    sidebarFab.addEventListener("click", function () {
+      setSidebarCollapsed(false);
+    });
+  }
 
   /* ---- Date / footer ----------------------------------------------- */
   const fmt = new Intl.DateTimeFormat("en", {
@@ -198,4 +213,5 @@
   });
 
   setPanel("input");
+  setSidebarCollapsed(false);
 })();

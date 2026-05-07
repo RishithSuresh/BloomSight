@@ -35,6 +35,7 @@ from visual_crypto import naor_shamir, theme, xor  # noqa: E402
 
 _STATIC_ROOT = _HERE / "static"
 _TEMPLATE = _HERE / "templates" / "index.html"
+_DEMO_TEMPLATE = _HERE / "templates" / "demo.html"
 _DEFAULT_PORT = 8000
 
 
@@ -134,6 +135,12 @@ class Handler(BaseHTTPRequestHandler):
             data = _TEMPLATE.read_bytes()
             self._send(HTTPStatus.OK, data, "text/html; charset=utf-8")
             return
+        if path in ("/demo", "/demo.html"):
+            if _DEMO_TEMPLATE.is_file():
+                data = _DEMO_TEMPLATE.read_bytes()
+                self._send(HTTPStatus.OK, data, "text/html; charset=utf-8")
+                return
+            # fall through to 404 if missing
         if path.startswith("/static/"):
             rel = path[len("/static/"):]
             target = (_STATIC_ROOT / rel).resolve()

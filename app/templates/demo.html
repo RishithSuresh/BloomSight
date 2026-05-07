@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BloomSight — Working Demo</title>
+  <link rel="stylesheet" href="/static/css/tokens.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    :root {
+      color-scheme: light;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(122, 162, 102, 0.18), transparent 34%),
+        radial-gradient(circle at 90% 10%, rgba(181, 138, 93, 0.18), transparent 28%),
+        linear-gradient(180deg, #f7f3ea 0%, #f3efe5 100%);
+      color: #1d2318;
+    }
+    .demo-shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 2rem 1rem 3rem;
+    }
+    .hero {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1.3fr 0.7fr;
+      align-items: end;
+      margin-bottom: 1.5rem;
+    }
+    .hero-card, .panel, .step, .output-card {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(56, 71, 44, 0.12);
+      box-shadow: 0 18px 40px rgba(49, 54, 37, 0.08);
+      backdrop-filter: blur(8px);
+      border-radius: 22px;
+    }
+    .hero-card {
+      padding: 1.5rem;
+    }
+    .hero h1, .panel h2, .step h3, .output-card h3 {
+      margin: 0 0 .5rem;
+      line-height: 1.1;
+    }
+    .hero h1 {
+      font-size: clamp(2.1rem, 4vw, 3.7rem);
+      letter-spacing: -0.04em;
+    }
+    .hero p, .panel p, .step p, .note {
+      margin: 0;
+      color: rgba(29, 35, 24, 0.78);
+      line-height: 1.55;
+    }
+    .hero-side {
+      padding: 1.1rem 1.2rem;
+      font-size: .96rem;
+    }
+    .hero-side .stat {
+      display: grid;
+      gap: .25rem;
+      padding: .8rem 0;
+      border-top: 1px solid rgba(56, 71, 44, 0.12);
+    }
+    .hero-side .stat:first-child { border-top: 0; padding-top: 0; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      border-radius: 999px;
+      padding: .4rem .75rem;
+      background: rgba(93, 122, 73, 0.1);
+      color: #3f5a2d;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    .panel {
+      padding: 1.25rem;
+    }
+    .controls {
+      display: grid;
+      gap: .9rem;
+      margin-top: 1rem;
+    }
+    .field {
+      display: grid;
+      gap: .35rem;
+    }
+    label {
+      font-weight: 650;
+      color: #2b3722;
+    }
+    input[type="file"], select, input[type="number"] {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(56, 71, 44, 0.18);
+      background: rgba(255, 255, 255, 0.92);
+      padding: .8rem .9rem;
+      font: inherit;
+      box-sizing: border-box;
+    }
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      color: #304024;
+      font-weight: 550;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+    }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: .82rem 1.15rem;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      background: #314a28;
+      color: #fff;
+    }
+    .btn.secondary {
+      background: rgba(49, 74, 40, 0.1);
+      color: #314a28;
+    }
+    .btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+    .preview-wrap {
+      display: grid;
+      gap: .8rem;
+      margin-top: 1rem;
+    }
+    .preview-box {
+      min-height: 260px;
+      border-radius: 18px;
+      border: 1px dashed rgba(56, 71, 44, 0.26);
+      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(245,242,234,0.95));
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: .75rem;
+      box-sizing: border-box;
+    }
+    .preview-box img {
+      max-width: 100%;
+      max-height: 320px;
+      display: block;
+      border-radius: 14px;
+    }
+    .samples {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .samples .btn {
+      padding: .6rem .9rem;
+      font-size: .92rem;
+    }
+    .output {
+      display: grid;
+      gap: 1rem;
+    }
+    .output-card {
+      padding: 1.25rem;
+    }
+    .shares {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: .9rem;
+      margin-top: 1rem;
+    }
+    .share {
+      padding: .7rem;
+      border-radius: 18px;
+      border: 1px solid rgba(56, 71, 44, 0.14);
+      background: rgba(255,255,255,0.8);
+    }
+    .share img {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+      background: #fff;
+    }
+    .share .meta {
+      margin-top: .6rem;
+      font-size: .9rem;
+      color: rgba(29, 35, 24, 0.72);
+      line-height: 1.45;
+    }
+    .steps {
+      display: grid;
+      gap: .9rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 1rem;
+    }
+    .step {
+      padding: 1rem;
+      min-height: 100%;
+    }
+    .step .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(49, 74, 40, 0.1);
+      color: #314a28;
+      font-weight: 800;
+      margin-bottom: .75rem;
+    }
+    .status {
+      margin-top: .8rem;
+      color: #314a28;
+      font-weight: 650;
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+    pre {
+      margin: .9rem 0 0;
+      padding: .9rem 1rem;
+      overflow: auto;
+      border-radius: 16px;
+      background: rgba(34, 45, 28, 0.94);
+      color: #f5f8ef;
+    }
+    footer {
+      margin-top: 1.2rem;
+      padding-top: 1rem;
+      color: rgba(29, 35, 24, 0.72);
+      text-align: center;
+    }
+    @media (max-width: 900px) {
+      .hero, .grid, .steps {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="demo-shell">
+    <section class="hero">
+      <div class="hero-card">
+        <span class="pill">Interactive demo</span>
+        <h1>See the project working with a real input</h1>
+        <p>
+          Upload an image, choose an encryption method, generate shares, and watch the
+          output appear just like the project does in the main UI.
+        </p>
+      </div>
+      <div class="hero-card hero-side">
+        <div class="stat">
+          <strong>Input</strong>
+          <span>Choose your own file or load a built-in sample image.</span>
+        </div>
+        <div class="stat">
+          <strong>Output</strong>
+          <span>View the generated shares and compare the workflow visually.</span>
+        </div>
+        <div class="stat">
+          <strong>Action</strong>
+          <span>Use the main app for drag-to-stack reveal after generating shares.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Try it</h2>
+        <p>Give the demo an image and generate the shares from the backend.</p>
+
+        <div class="controls">
+          <div class="field">
+            <label for="demo-file">Input image</label>
+            <input id="demo-file" type="file" accept="image/*" />
+          </div>
+
+          <div class="samples">
+            <button class="btn secondary" id="sample-btn" type="button">Load sample image</button>
+            <button class="btn secondary" id="clear-btn" type="button">Clear</button>
+          </div>
+
+          <div class="field">
+            <label for="demo-method">Method</label>
+            <select id="demo-method">
+              <option value="naor-shamir">Naor-Shamir - 2 shares, stack to reveal</option>
+              <option value="xor">XOR - n shares, exact recovery</option>
+            </select>
+          </div>
+
+          <div class="field" id="demo-shares-field" hidden>
+            <label for="demo-shares">Number of shares</label>
+            <input id="demo-shares" type="number" min="2" max="6" value="2" />
+          </div>
+
+          <label class="toggle">
+            <input type="checkbox" id="demo-themed" checked />
+            <span>Apply themed palette to the output</span>
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="demo-downsample" checked />
+            <span>Downsample Naor-Shamir reveal to the original size</span>
+          </label>
+
+          <div class="actions">
+            <button class="btn" id="run-btn" type="button" disabled>Generate shares</button>
+            <a class="btn secondary" href="/">Open main UI</a>
+          </div>
+        </div>
+
+        <div class="preview-wrap">
+          <strong>Chosen input</strong>
+          <div class="preview-box">
+            <img id="input-preview" alt="Selected input preview" hidden />
+            <p id="input-placeholder">No file selected yet. Load a sample or upload your own image.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="output">
+        <div class="output-card">
+          <h2>What the backend returns</h2>
+          <p>
+            This page sends the input image to <code>/api/encrypt</code> and renders the resulting
+            shares so you can see the project's behavior with a real example.
+          </p>
+          <div class="status" id="status">Waiting for an input.</div>
+          <pre id="payload-preview">{
+  "image": "(selected image data URL)",
+  "method": "naor-shamir",
+  "n_shares": 2,
+  "themed": true
+}</pre>
+        </div>
+
+        <div class="output-card">
+          <h3>Generated shares</h3>
+          <div class="shares" id="shares"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="steps">
+      <article class="step">
+        <div class="num">1</div>
+        <h3>Pick an input</h3>
+        <p>Upload a photo or load the built-in sample so the demo has an image to process.</p>
+      </article>
+      <article class="step">
+        <div class="num">2</div>
+        <h3>Generate shares</h3>
+        <p>Press <strong>Generate shares</strong> to send the input to the server and create the visual crypto output.</p>
+      </article>
+      <article class="step">
+        <div class="num">3</div>
+        <h3>Inspect the result</h3>
+        <p>Review the shares below, then open the main app to stack them and reveal the image when using Naor-Shamir.</p>
+      </article>
+    </section>
+
+    <footer>
+      BloomSight demo walkthrough. Return to the <a href="/">main application</a> any time.
+    </footer>
+  </main>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    (function () {
+      const $ = function (id) { return document.getElementById(id); };
+      const state = { dataURL: null, fileName: null };
+
+      const sampleSvg = [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">',
+        '<defs>',
+        '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">',
+        '<stop offset="0%" stop-color="#dfe9c9"/>',
+        '<stop offset="100%" stop-color="#f8f1dc"/>',
+        '</linearGradient>',
+        '</defs>',
+        '<rect width="640" height="420" fill="url(#sky)"/>',
+        '<circle cx="120" cy="88" r="42" fill="#e9c46a" opacity="0.85"/>',
+        '<path d="M40 320 C120 250, 220 260, 300 330 S500 390, 600 300" fill="none" stroke="#6b8f5b" stroke-width="18" stroke-linecap="round"/>',
+        '<path d="M120 220 C150 190, 210 178, 246 206 C278 230, 294 276, 286 320" fill="#8fbf71" opacity="0.9"/>',
+        '<path d="M230 208 C270 160, 350 150, 386 204 C418 252, 402 308, 344 334" fill="#7aa262" opacity="0.82"/>',
+        '<circle cx="318" cy="196" r="34" fill="#d6a15b"/>',
+        '<text x="30" y="392" font-family="Georgia, serif" font-size="28" fill="#36502a">BloomSight sample input</text>',
+        '</svg>'
+      ].join('');
+
+      const sampleDataURL = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(sampleSvg)));
+
+      function syncMethod() {
+        $('demo-shares-field').hidden = $('demo-method').value !== 'xor';
+      }
+
+      function setInput(dataURL, fileName) {
+        state.dataURL = dataURL;
+        state.fileName = fileName || 'sample.svg';
+        $('input-preview').src = dataURL;
+        $('input-preview').hidden = false;
+        $('input-placeholder').hidden = true;
+        $('run-btn').disabled = false;
+        $('status').textContent = 'Input ready: ' + state.fileName + '.';
+        $('payload-preview').textContent = JSON.stringify({
+          image: '(selected image data URL)',
+          method: $('demo-method').value,
+          n_shares: parseInt($('demo-shares').value, 10) || 2,
+          themed: $('demo-themed').checked,
+        }, null, 2);
+      }
+
+      function clearOutput() {
+        $('shares').innerHTML = '';
+      }
+
+      function renderShares(payload) {
+        const host = $('shares');
+        host.innerHTML = '';
+        payload.shares.forEach(function (share) {
+          const card = document.createElement('article');
+          card.className = 'share';
+          card.innerHTML =
+            '<img alt="Share ' + share.index + '" src="' + share.image + '" />' +
+            '<div class="meta">Share ' + share.index + '<br />' +
+            share.width + ' × ' + share.height + ' px</div>';
+          host.appendChild(card);
+        });
+      }
+
+      $('demo-method').addEventListener('change', function () {
+        syncMethod();
+        $('payload-preview').textContent = JSON.stringify({
+          image: '(selected image data URL)',
+          method: $('demo-method').value,
+          n_shares: parseInt($('demo-shares').value, 10) || 2,
+          themed: $('demo-themed').checked,
+        }, null, 2);
+      });
+
+      $('demo-file').addEventListener('change', function (event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        BS.api.fileToDataURL(file).then(function (url) {
+          setInput(url, file.name);
+          clearOutput();
+        });
+      });
+
+      $('sample-btn').addEventListener('click', function () {
+        setInput(sampleDataURL, 'sample-input.svg');
+        clearOutput();
+      });
+
+      $('clear-btn').addEventListener('click', function () {
+        state.dataURL = null;
+        state.fileName = null;
+        $('demo-file').value = '';
+        $('input-preview').src = '';
+        $('input-preview').hidden = true;
+        $('input-placeholder').hidden = false;
+        $('run-btn').disabled = true;
+        $('shares').innerHTML = '';
+        $('status').textContent = 'Waiting for an input.';
+      });
+
+      $('run-btn').addEventListener('click', async function () {
+        if (!state.dataURL) return;
+        $('status').textContent = 'Generating shares...';
+        $('run-btn').disabled = true;
+        try {
+          const payload = await BS.api.encrypt({
+            image: state.dataURL,
+            method: $('demo-method').value,
+            n_shares: parseInt($('demo-shares').value, 10) || 2,
+            themed: $('demo-themed').checked,
+          });
+          renderShares(payload);
+          $('status').textContent = 'Generated ' + payload.shares.length + ' share(s) from ' + state.fileName + '.';
+          $('payload-preview').textContent = JSON.stringify({
+            image: '(selected image data URL)',
+            method: $('demo-method').value,
+            n_shares: parseInt($('demo-shares').value, 10) || 2,
+            themed: $('demo-themed').checked,
+          }, null, 2);
+        } catch (error) {
+          $('status').textContent = 'Error: ' + error.message;
+        } finally {
+          $('run-btn').disabled = !state.dataURL;
+        }
+      });
+
+      $('demo-shares').addEventListener('input', function () {
+        $('payload-preview').textContent = JSON.stringify({
+          image: '(selected image data URL)',
+          method: $('demo-method').value,
+          n_shares: parseInt($('demo-shares').value, 10) || 2,
+          themed: $('demo-themed').checked,
+        }, null, 2);
+      });
+
+      $('demo-themed').addEventListener('change', function () {
+        $('payload-preview').textContent = JSON.stringify({
+          image: '(selected image data URL)',
+          method: $('demo-method').value,
+          n_shares: parseInt($('demo-shares').value, 10) || 2,
+          themed: $('demo-themed').checked,
+        }, null, 2);
+      });
+
+      syncMethod();
+      setInput(sampleDataURL, 'sample-input.svg');
+      clearOutput();
+    })();
+  </script>
+</body>
+</html>

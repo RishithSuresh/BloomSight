@@ -19,10 +19,13 @@ def _random_image(mode: str, size=(48, 32), seed: int = 1) -> Image.Image:
     return Image.fromarray(arr, mode=mode)
 
 
+_MODE_SEEDS = {"L": 11, "RGB": 22, "RGBA": 33}
+
+
 @pytest.mark.parametrize("mode", ["L", "RGB", "RGBA"])
 @pytest.mark.parametrize("n_shares", [2, 3, 5])
 def test_xor_round_trip_recovers_original(mode: str, n_shares: int) -> None:
-    src = _random_image(mode, seed=mode.__hash__() + n_shares)
+    src = _random_image(mode, seed=_MODE_SEEDS[mode] + n_shares)
     shares = xor_encrypt(src, n_shares=n_shares, seed=123)
 
     assert len(shares) == n_shares

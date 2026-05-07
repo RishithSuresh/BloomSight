@@ -1,0 +1,79 @@
+/* BloomSight design tokens.
+   Palette is sourced from the brand spec; season modes recolour the
+   ambient/accent layer while leaving structural tokens untouched.    */
+
+:root {
+  /* --- Brand palette ------------------------------------------------- */
+  --c-forest:       #1B5E20;
+  --c-leaf:         #4CAF50;
+  --c-earth:        #6D4C41;
+  --c-sky:          #4FC3F7;
+  --c-sun:          #FBC02D;
+  --c-alert:        #E53935;
+  --c-cream:        #F1F8E9;
+  --c-night:        #0D1B12;
+
+  /* --- Ambient (theme-able by season) ------------------------------- */
+  --bg-page:        #efe6d2;          /* aged parchment   */
+  --bg-paper:       #faf3e3;          /* specimen mount   */
+  --bg-deep:        #d8c9a4;          /* journal cover    */
+  --ink-strong:     #2a241b;          /* iron-gall ink    */
+  --ink-soft:       #5b4f3d;
+  --ink-faded:      #8e7f63;
+  --rule:           rgba(64, 50, 30, 0.18);
+  --brass:          #b08a3a;
+  --brass-dark:     #6f5418;
+
+  /* --- Accent semantics --------------------------------------------- */
+  --accent:         var(--c-forest);
+  --accent-soft:    var(--c-leaf);
+  --accent-warm:    var(--c-earth);
+  --accent-cool:    var(--c-sky);
+
+  /* --- Type --------------------------------------------------------- */
+  --font-display:   "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-body:      "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --font-hand:      "Caveat", "Homemade Apple", "Segoe Script", cursive;
+  --font-mono:      ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --type-display:   clamp(2rem, 4vw + 1rem, 3.6rem);
+  --type-h2:        clamp(1.4rem, 1.2vw + 1rem, 1.9rem);
+  --type-body:      1.0625rem;
+  --type-small:     0.875rem;
+  --type-tiny:      0.75rem;
+
+  /* --- Geometry ----------------------------------------------------- */
+  --radius-sm:      6px;
+  --radius-md:      14px;
+  --radius-lg:      22px;
+  --shadow-leaf:    0 1px 0 rgba(255,255,255,.5) inset,
+                    0 12px 24px -12px rgba(40, 30, 10, .35),
+                    0 2px 4px rgba(40, 30, 10, .12);
+  --shadow-pin:     0 1px 1px rgba(0,0,0,.4),
+                    0 0 0 1px rgba(0,0,0,.1) inset;
+  --ease-bloom:     cubic-bezier(.2, .8, .2, 1);
+}
+
+/* Season palettes - swap ambient layer only.                          */
+[data-season="spring"] {
+  --bg-page: #eef0d6;  --bg-paper: #f7f9e3;  --bg-deep: #cfd8a3;
+  --accent: var(--c-leaf);   --accent-soft: var(--c-sun);
+  --ink-strong: #233018;     --ink-soft: #44542f;
+}
+[data-season="summer"] {
+  --bg-page: #e9efd0;  --bg-paper: #fcf7da;  --bg-deep: #c9c178;
+  --accent: var(--c-forest); --accent-soft: var(--c-leaf);
+  --ink-strong: #1d2a13;     --ink-soft: #3a4a25;
+}
+[data-season="autumn"] {
+  --bg-page: #efddc0;  --bg-paper: #f7e6c8;  --bg-deep: #c89865;
+  --accent: var(--c-earth);  --accent-soft: var(--c-sun);
+  --ink-strong: #3a2415;     --ink-soft: #6b4724;
+  --brass: #c08036;          --brass-dark: #8a4f12;
+}
+[data-season="winter"] {
+  --bg-page: #d7dde1;  --bg-paper: #e9eef1;  --bg-deep: #97a4ac;
+  --accent: var(--c-sky);    --accent-soft: #b9d8df;
+  --ink-strong: #142028;     --ink-soft: #36505d;
+  --brass: #8aa3ad;          --brass-dark: #4a6571;
+}

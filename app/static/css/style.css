@@ -1,0 +1,153 @@
+/* BloomSight Herbarium - layout & components.                         */
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=EB+Garamond:wght@400;600&family=Caveat:wght@500;700&display=swap");
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  color: var(--ink-strong);
+  background: var(--bg-page);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,.5), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(40,30,10,.10), transparent 50%),
+    repeating-radial-gradient(circle at 0 0, rgba(0,0,0,.012) 0 1px, transparent 1px 4px),
+    repeating-radial-gradient(circle at 100% 100%, rgba(40,30,10,.018) 0 1px, transparent 1px 5px);
+  min-height: 100vh;
+  letter-spacing: 0.01em;
+}
+
+/* ===== Header ========================================================= */
+.masthead {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 2rem; padding: 2.4rem 3rem 1.2rem;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.masthead::after {
+  content: ""; position: absolute; left: 3rem; right: 3rem; bottom: -3px;
+  height: 1px; background: var(--rule);
+}
+.brand { display: flex; align-items: center; gap: 0.9rem; }
+.brand .leafmark { width: 46px; height: 46px; color: var(--accent); }
+.brand .wordmark {
+  font-family: var(--font-display);
+  font-size: var(--type-display); font-weight: 600;
+  line-height: 0.95; letter-spacing: -0.01em;
+}
+.brand .tagline {
+  font-family: var(--font-display); font-style: italic;
+  color: var(--ink-soft); font-size: 1.1rem; margin-top: .2rem;
+}
+.masthead .meta {
+  text-align: right; font-size: var(--type-small); color: var(--ink-faded);
+  font-variant: small-caps; letter-spacing: .14em;
+}
+
+/* ===== Season switcher =============================================== */
+.seasons { display: flex; gap: .35rem; margin-top: .6rem; justify-content: flex-end; }
+.season-pill {
+  font-family: var(--font-body); font-size: var(--type-tiny);
+  text-transform: uppercase; letter-spacing: .18em;
+  border: 1px solid var(--rule); background: transparent;
+  color: var(--ink-soft); padding: .35rem .7rem; border-radius: 999px;
+  cursor: pointer; transition: all .25s var(--ease-bloom);
+}
+.season-pill:hover { border-color: var(--accent); color: var(--accent); }
+.season-pill[aria-pressed="true"] {
+  background: var(--accent); color: var(--bg-paper);
+  border-color: var(--accent);
+}
+
+/* ===== Page layout =================================================== */
+main { padding: 2rem 3rem 5rem; max-width: 1280px; margin: 0 auto; }
+.section-rule {
+  display: flex; align-items: center; gap: 1rem; margin: 2.5rem 0 1.2rem;
+}
+.section-rule h2 {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--type-h2); margin: 0;
+  color: var(--ink-strong); letter-spacing: .02em;
+}
+.section-rule .ornament {
+  flex: 1; height: 1px; background: var(--rule); position: relative;
+}
+.section-rule .ornament::after {
+  content: "✿"; color: var(--accent); position: absolute; right: -8px;
+  top: -10px; background: var(--bg-page); padding: 0 .35rem;
+}
+
+/* ===== Intake panel ================================================== */
+.intake {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1.1fr);
+  gap: 2rem; align-items: stretch;
+}
+.dropzone {
+  position: relative; border: 1.5px dashed var(--ink-faded);
+  border-radius: var(--radius-md); background: var(--bg-paper);
+  padding: 2rem 1.5rem; min-height: 260px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; transition: all .25s var(--ease-bloom);
+  box-shadow: var(--shadow-leaf);
+}
+.dropzone:hover, .dropzone.is-hover {
+  border-color: var(--accent); background: #fff;
+  transform: translateY(-2px);
+}
+.dropzone .leaf-bg {
+  position: absolute; inset: 0; pointer-events: none; opacity: .07;
+  background-image: url("/static/img/leaf.svg");
+  background-repeat: no-repeat; background-position: center; background-size: 60%;
+}
+.dropzone h3 { font-family: var(--font-display); font-size: 1.6rem; margin: 0 0 .3rem; }
+.dropzone p  { color: var(--ink-soft); margin: 0; font-style: italic; }
+.dropzone input[type=file] { display: none; }
+.dropzone .preview {
+  max-width: 220px; max-height: 180px; margin-top: 1rem;
+  border: 8px solid var(--bg-paper); box-shadow: var(--shadow-leaf);
+  background: #fff;
+}
+
+/* Field journal form */
+.journal {
+  background: var(--bg-paper); border-radius: var(--radius-md);
+  padding: 1.6rem 1.8rem; box-shadow: var(--shadow-leaf);
+  background-image: repeating-linear-gradient(transparent 0 31px, rgba(64,50,30,.07) 31px 32px);
+  background-position: 0 12px;
+}
+.journal h3 {
+  font-family: var(--font-display); font-size: 1.4rem; margin: 0 0 .6rem;
+  border-bottom: 1px solid var(--rule); padding-bottom: .35rem;
+}
+.field { display: flex; flex-direction: column; gap: .35rem; margin: .9rem 0; }
+.field label {
+  font-variant: small-caps; font-size: var(--type-small);
+  letter-spacing: .15em; color: var(--ink-soft);
+}
+.field select, .field input[type=number] {
+  font: inherit; padding: .55rem .7rem; border: 1px solid var(--rule);
+  background: rgba(255,255,255,.6); border-radius: var(--radius-sm);
+  color: var(--ink-strong);
+}
+.toggle { display: flex; align-items: center; gap: .55rem; cursor: pointer; }
+.toggle input { accent-color: var(--accent); }
+.actions { display: flex; gap: .8rem; margin-top: 1.2rem; }
+
+/* ===== Buttons (wax-seal style) ====================================== */
+.btn {
+  font-family: var(--font-display); font-size: 1.1rem;
+  letter-spacing: .04em; padding: .7rem 1.4rem; border-radius: 999px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--bg-paper);
+  cursor: pointer; transition: all .25s var(--ease-bloom);
+  box-shadow: 0 4px 0 var(--brass-dark), 0 6px 14px -6px rgba(0,0,0,.4);
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--brass-dark); }
+.btn.ghost {
+  background: transparent; color: var(--ink-strong);
+  border-color: var(--ink-faded); box-shadow: none;
+}
+.btn[disabled] { opacity: .5; cursor: not-allowed; }

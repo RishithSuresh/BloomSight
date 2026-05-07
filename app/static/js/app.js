@@ -3,6 +3,42 @@
 (function () {
   const $ = function (id) { return document.getElementById(id); };
   const state = { dataURL: null, lastShares: null, stacking: null };
+  const panels = Array.prototype.slice.call(document.querySelectorAll(".workflow-panel"));
+  const panelButtons = Array.prototype.slice.call(document.querySelectorAll("[data-panel-target]"));
+  const sidebar = $("sidebar");
+  const sidebarToggle = $("sidebar-toggle");
+  let activePanel = "input";
+
+  function syncPanelButtons() {
+    panelButtons.forEach(function (button) {
+      const target = button.getAttribute("data-panel-target");
+      const isActive = target === activePanel;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-selected", String(isActive));
+    });
+  }
+
+  function setPanel(name) {
+    activePanel = name;
+    panels.forEach(function (panel) {
+      panel.hidden = panel.getAttribute("data-panel") !== name;
+    });
+    syncPanelButtons();
+  }
+
+  panelButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      const target = button.getAttribute("data-panel-target");
+      if (!target || button.disabled) return;
+      setPanel(target);
+    });
+  });
+
+  sidebarToggle.addEventListener("click", function () {
+    const collapsed = sidebar.classList.toggle("is-collapsed");
+    sidebarToggle.textContent = collapsed ? "Expand" : "Collapse";
+    sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+  });
 
   /* ---- Date / footer ----------------------------------------------- */
   const fmt = new Intl.DateTimeFormat("en", {
@@ -79,6 +115,10 @@
         '</div>' + ornamentFor(sh.image.slice(-32) + i);
       host.appendChild(card);
     });
+    panelButtons.forEach(function (button) {
+      if (button.getAttribute("data-panel-target") === "shares") button.disabled = false;
+      if (button.getAttribute("data-panel-target") === "reveal") button.disabled = false;
+    });
   }
 
   /* ---- Mount the stacking plate (Naor-Shamir only) ----------------- */
@@ -103,6 +143,7 @@
 
   async function showRecovered(payload) {
     try {
+      setPanel("reveal");
       const res = await BS.api.decrypt({
         method: payload.method,
         shares: payload.shares.map(function (s) { return s.image; }),
@@ -130,6 +171,7 @@
       });
       state.lastShares = payload;
       renderSpecimens(payload);
+      setPanel("shares");
       $("reveal-card").classList.remove("shown");
       await mountPlate(payload);
       if (payload.method === "xor") showRecovered(payload);
@@ -148,5 +190,12 @@
     $("plate").hidden = true;
     $("reveal-card").classList.remove("shown");
     $("encrypt-btn").disabled = true;
+    panelButtons.forEach(function (button) {
+      const target = button.getAttribute("data-panel-target");
+      button.disabled = target !== "input";
+    });
+    setPanel("input");
   });
+
+  setPanel("input");
 })();

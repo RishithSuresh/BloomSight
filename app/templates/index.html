@@ -10,127 +10,151 @@
   <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
-
-<header class="masthead">
-  <div class="brand">
-    <svg class="leafmark" viewBox="0 0 64 64" aria-hidden="true">
-      <path d="M32 4 C16 14, 8 28, 12 44 C16 56, 28 60, 32 60 C36 60, 48 56, 52 44 C56 28, 48 14, 32 4 Z"
-            fill="currentColor" opacity=".18"/>
-      <path d="M32 6 C18 16, 12 30, 18 44 C24 56, 32 58, 32 58 L32 14 Z"
-            fill="currentColor"/>
-      <path d="M32 14 L32 58 M22 26 L32 30 M44 22 L32 26 M20 38 L32 42 M46 36 L32 40 M22 50 L32 52"
-            stroke="#fff" stroke-width="1.4" fill="none" opacity=".7"/>
-    </svg>
-    <div>
-      <div class="wordmark">BloomSight</div>
-      <div class="tagline">Visual cryptography toolkit</div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar" aria-label="Project tabs">
+    <div class="sidebar-head">
+      <div class="sidebar-brand">BloomSight</div>
+      <button class="sidebar-toggle btn ghost" id="sidebar-toggle" type="button" aria-expanded="true">
+        Collapse
+      </button>
     </div>
-  </div>
-  <div class="meta">
-    <div>Build 1.0 &middot; Session 001</div>
-    <div id="folio-date">&mdash;</div>
-  </div>
-  <div class="meta">
-    <a href="/demo" style="color:inherit;text-decoration:underline;">Demo</a>
-  </div>
-</header>
+    <nav class="sidebar-tabs" aria-label="Sections">
+      <button class="sidebar-tab is-active" type="button" data-panel-target="input" aria-selected="true">Input</button>
+      <button class="sidebar-tab" type="button" data-panel-target="shares" aria-selected="false" disabled>Shares</button>
+      <button class="sidebar-tab" type="button" data-panel-target="reveal" aria-selected="false" disabled>Reveal</button>
+      <a class="sidebar-tab sidebar-link" href="/demo">Demo</a>
+    </nav>
+    <div class="sidebar-note">
+      Upload an image, generate shares, then switch panels to inspect the result.
+    </div>
+  </aside>
 
-<main>
-  <section class="section-rule">
-    <h2>1 &mdash; Input</h2><div class="ornament"></div>
-  </section>
-
-  <div class="intake">
-    <label class="dropzone" id="dropzone">
-      <div class="leaf-bg" aria-hidden="true"></div>
-      <h3>Upload image</h3>
-      <p>Drop an image here or click to choose &mdash; PNG, JPG, BMP&hellip;</p>
-      <img class="preview" id="preview" alt="" hidden />
-      <input type="file" id="file" accept="image/*" />
-    </label>
-
-    <div class="journal">
-      <h3>Parameters</h3>
-      <div class="field">
-        <label for="method">Encryption method</label>
-        <select id="method">
-          <option value="naor-shamir">Naor&ndash;Shamir &mdash; 2-of-2, reveal by stacking</option>
-          <option value="xor">XOR &mdash; n-of-n, exact recovery</option>
-        </select>
-      </div>
-      <div class="field" id="shares-field" hidden>
-        <label for="shares">Number of shares (n)</label>
-        <input id="shares" type="number" min="2" max="6" value="2" />
-      </div>
-      <label class="toggle">
-        <input type="checkbox" id="themed" checked />
-        <span>Apply themed palette to shares</span>
-      </label>
-      <label class="toggle">
-        <input type="checkbox" id="downsample" checked />
-        <span>Downsample reveal to original resolution</span>
-      </label>
-      <div class="actions">
-        <button class="btn" id="encrypt-btn" disabled>Generate shares</button>
-        <button class="btn ghost" id="reset-btn" type="button">Reset</button>
-      </div>
-      <div class="vine" id="vine" aria-hidden="true">
-        <svg viewBox="0 0 600 56" preserveAspectRatio="none">
-          <path class="stroke" d="M5 40 C 80 10, 140 60, 220 30 S 360 10, 440 36 S 560 56, 595 22"/>
-          <path class="stroke" d="M120 35 q -10 -16 -22 -10 M260 26 q 10 -18 24 -10 M400 32 q -8 -18 -22 -10 M520 30 q 12 -16 22 -8" stroke-width="1.6"/>
+  <div class="page-shell">
+    <header class="masthead">
+      <div class="brand">
+        <svg class="leafmark" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 4 C16 14, 8 28, 12 44 C16 56, 28 60, 32 60 C36 60, 48 56, 52 44 C56 28, 48 14, 32 4 Z"
+                fill="currentColor" opacity=".18"/>
+          <path d="M32 6 C18 16, 12 30, 18 44 C24 56, 32 58, 32 58 L32 14 Z"
+                fill="currentColor"/>
+          <path d="M32 14 L32 58 M22 26 L32 30 M44 22 L32 26 M20 38 L32 42 M46 36 L32 40 M22 50 L32 52"
+                stroke="#fff" stroke-width="1.4" fill="none" opacity=".7"/>
         </svg>
+        <div>
+          <div class="wordmark">BloomSight</div>
+          <div class="tagline">Visual cryptography toolkit</div>
+        </div>
       </div>
-    </div>
+      <div class="meta">
+        <div>Build 1.0 &middot; Session 001</div>
+        <div id="folio-date">&mdash;</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="workflow-panel" data-panel="input">
+        <section class="section-rule">
+          <h2>1 &mdash; Input</h2><div class="ornament"></div>
+        </section>
+
+        <div class="intake">
+          <label class="dropzone" id="dropzone">
+            <div class="leaf-bg" aria-hidden="true"></div>
+            <h3>Upload image</h3>
+            <p>Drop an image here or click to choose &mdash; PNG, JPG, BMP&hellip;</p>
+            <img class="preview" id="preview" alt="" hidden />
+            <input type="file" id="file" accept="image/*" />
+          </label>
+
+          <div class="journal">
+            <h3>Parameters</h3>
+            <div class="field">
+              <label for="method">Encryption method</label>
+              <select id="method">
+                <option value="naor-shamir">Naor&ndash;Shamir &mdash; 2-of-2, reveal by stacking</option>
+                <option value="xor">XOR &mdash; n-of-n, exact recovery</option>
+              </select>
+            </div>
+            <div class="field" id="shares-field" hidden>
+              <label for="shares">Number of shares (n)</label>
+              <input id="shares" type="number" min="2" max="6" value="2" />
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="themed" checked />
+              <span>Apply themed palette to shares</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="downsample" checked />
+              <span>Downsample reveal to original resolution</span>
+            </label>
+            <div class="actions">
+              <button class="btn" id="encrypt-btn" disabled>Generate shares</button>
+              <button class="btn ghost" id="reset-btn" type="button">Reset</button>
+            </div>
+            <div class="vine" id="vine" aria-hidden="true">
+              <svg viewBox="0 0 600 56" preserveAspectRatio="none">
+                <path class="stroke" d="M5 40 C 80 10, 140 60, 220 30 S 360 10, 440 36 S 560 56, 595 22"/>
+                <path class="stroke" d="M120 35 q -10 -16 -22 -10 M260 26 q 10 -18 24 -10 M400 32 q -8 -18 -22 -10 M520 30 q 12 -16 22 -8" stroke-width="1.6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="workflow-panel" data-panel="shares" hidden>
+        <section class="section-rule">
+          <h2>2 &mdash; Generated shares</h2><div class="ornament"></div>
+        </section>
+        <div class="specimens" id="specimens"></div>
+      </section>
+
+      <section class="workflow-panel" data-panel="reveal" hidden>
+        <section class="section-rule">
+          <h2>3 &mdash; Reveal by stacking</h2><div class="ornament"></div>
+        </section>
+        <div class="plate" id="plate" hidden>
+          <div class="plate-instructions" id="plate-instructions">
+            Drag share 2 onto share 1 to overlay them.
+          </div>
+          <div class="stage" id="stage">
+            <canvas class="base" id="base-canvas"></canvas>
+            <canvas class="reveal" id="reveal-canvas"></canvas>
+            <div class="draggable" id="draggable">
+              <canvas id="drag-canvas"></canvas>
+            </div>
+          </div>
+          <svg class="compass" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path d="M32 6 L36 32 L32 58 L28 32 Z" fill="currentColor"/>
+            <text x="32" y="14" text-anchor="middle" font-family="serif" font-size="8" fill="currentColor">N</text>
+          </svg>
+        </div>
+
+        <div class="reveal-card" id="reveal-card">
+          <h3>Recovered image</h3>
+          <div class="row">
+            <img id="reveal-img" alt="Recovered image" />
+            <div>
+              <p style="margin:0 0 .4rem;font-style:italic;color:var(--ink-soft);">
+                Shares aligned. Original image reconstructed.
+              </p>
+              <a class="btn ghost" id="download-link" download="recovered.png">Download</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      BloomSight Visual Cryptography &middot; <span id="footer-year"></span>
+    </footer>
   </div>
 
-  <section class="section-rule">
-    <h2>2 &mdash; Generated shares</h2><div class="ornament"></div>
-  </section>
-  <div class="specimens" id="specimens"></div>
+  <div class="toast" id="toast" role="status"></div>
 
-  <section class="section-rule">
-    <h2>3 &mdash; Reveal by stacking</h2><div class="ornament"></div>
-  </section>
-  <div class="plate" id="plate" hidden>
-    <div class="plate-instructions" id="plate-instructions">
-      Drag share 2 onto share 1 to overlay them.
-    </div>
-    <div class="stage" id="stage">
-      <canvas class="base" id="base-canvas"></canvas>
-      <canvas class="reveal" id="reveal-canvas"></canvas>
-      <div class="draggable" id="draggable">
-        <canvas id="drag-canvas"></canvas>
-      </div>
-    </div>
-    <svg class="compass" viewBox="0 0 64 64" aria-hidden="true">
-      <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="1"/>
-      <path d="M32 6 L36 32 L32 58 L28 32 Z" fill="currentColor"/>
-      <text x="32" y="14" text-anchor="middle" font-family="serif" font-size="8" fill="currentColor">N</text>
-    </svg>
-  </div>
-
-  <div class="reveal-card" id="reveal-card">
-    <h3>Recovered image</h3>
-    <div class="row">
-      <img id="reveal-img" alt="Recovered image" />
-      <div>
-        <p style="margin:0 0 .4rem;font-style:italic;color:var(--ink-soft);">
-          Shares aligned. Original image reconstructed.
-        </p>
-        <a class="btn ghost" id="download-link" download="recovered.png">Download</a>
-      </div>
-    </div>
-  </div>
-</main>
-
-<footer>
-  BloomSight Visual Cryptography &middot; <span id="footer-year"></span>
-</footer>
-
-<div class="toast" id="toast" role="status"></div>
-
-<script src="/static/js/api.js"></script>
-<script src="/static/js/stacking.js"></script>
-<script src="/static/js/app.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/stacking.js"></script>
+  <script src="/static/js/app.js"></script>
+</div>
 </body>
 </html>

@@ -1,4 +1,4 @@
-"""Standard-library HTTP server for the BloomSight Herbarium UI.
+"""Standard-library HTTP server for the BloomSight UI.
 
 The server exposes a tiny JSON API that wraps the ``visual_crypto``
 package and serves the static front-end. No third-party web framework
@@ -105,7 +105,7 @@ def _decrypt(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "BloomSightHerbarium/1.0"
+    server_version = "BloomSight/1.0"
 
     def log_message(self, fmt, *args):  # pragma: no cover - quieter logs
         sys.stderr.write("[ui] " + (fmt % args) + "\n")
@@ -166,7 +166,7 @@ def main(argv: List[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     port = int(args[0]) if args else _DEFAULT_PORT
     httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print(f"[BloomSight Herbarium] http://127.0.0.1:{port}")
+    print(f"[BloomSight] http://127.0.0.1:{port}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

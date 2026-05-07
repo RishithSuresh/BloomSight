@@ -46,21 +46,6 @@ body {
   font-variant: small-caps; letter-spacing: .14em;
 }
 
-/* ===== Season switcher =============================================== */
-.seasons { display: flex; gap: .35rem; margin-top: .6rem; justify-content: flex-end; }
-.season-pill {
-  font-family: var(--font-body); font-size: var(--type-tiny);
-  text-transform: uppercase; letter-spacing: .18em;
-  border: 1px solid var(--rule); background: transparent;
-  color: var(--ink-soft); padding: .35rem .7rem; border-radius: 999px;
-  cursor: pointer; transition: all .25s var(--ease-bloom);
-}
-.season-pill:hover { border-color: var(--accent); color: var(--accent); }
-.season-pill[aria-pressed="true"] {
-  background: var(--accent); color: var(--bg-paper);
-  border-color: var(--accent);
-}
-
 /* ===== Page layout =================================================== */
 main { padding: 2rem 3rem 5rem; max-width: 1280px; margin: 0 auto; }
 .section-rule {

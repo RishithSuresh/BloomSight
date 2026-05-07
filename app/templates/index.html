@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-season="summer">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BloomSight Herbarium &mdash; Visual Cryptography</title>
+  <title>BloomSight &mdash; Visual Cryptography</title>
   <link rel="stylesheet" href="/static/css/tokens.css" />
   <link rel="stylesheet" href="/static/css/style.css" />
   <link rel="stylesheet" href="/static/css/herbarium.css" />
@@ -23,59 +23,53 @@
     </svg>
     <div>
       <div class="wordmark">BloomSight</div>
-      <div class="tagline">A herbarium of visual ciphers</div>
+      <div class="tagline">Visual cryptography toolkit</div>
     </div>
   </div>
   <div class="meta">
-    <div>Vol. I &middot; Folio 001</div>
+    <div>Build 1.0 &middot; Session 001</div>
     <div id="folio-date">&mdash;</div>
-    <div class="seasons" role="group" aria-label="Season">
-      <button class="season-pill" data-set-season="spring" aria-pressed="false">Spring</button>
-      <button class="season-pill" data-set-season="summer" aria-pressed="true">Summer</button>
-      <button class="season-pill" data-set-season="autumn" aria-pressed="false">Autumn</button>
-      <button class="season-pill" data-set-season="winter" aria-pressed="false">Winter</button>
-    </div>
   </div>
 </header>
 
 <main>
   <section class="section-rule">
-    <h2>I &mdash; Specimen Intake</h2><div class="ornament"></div>
+    <h2>1 &mdash; Input</h2><div class="ornament"></div>
   </section>
 
   <div class="intake">
     <label class="dropzone" id="dropzone">
       <div class="leaf-bg" aria-hidden="true"></div>
-      <h3>Press a specimen</h3>
+      <h3>Upload image</h3>
       <p>Drop an image here or click to choose &mdash; PNG, JPG, BMP&hellip;</p>
       <img class="preview" id="preview" alt="" hidden />
       <input type="file" id="file" accept="image/*" />
     </label>
 
     <div class="journal">
-      <h3>Field notes</h3>
+      <h3>Parameters</h3>
       <div class="field">
-        <label for="method">Method of preservation</label>
+        <label for="method">Encryption method</label>
         <select id="method">
-          <option value="naor-shamir">Naor&ndash;Shamir &mdash; reveal by stacking</option>
-          <option value="xor">XOR &mdash; exact recovery</option>
+          <option value="naor-shamir">Naor&ndash;Shamir &mdash; 2-of-2, reveal by stacking</option>
+          <option value="xor">XOR &mdash; n-of-n, exact recovery</option>
         </select>
       </div>
       <div class="field" id="shares-field" hidden>
-        <label for="shares">Number of shares</label>
+        <label for="shares">Number of shares (n)</label>
         <input id="shares" type="number" min="2" max="6" value="2" />
       </div>
       <label class="toggle">
         <input type="checkbox" id="themed" checked />
-        <span>Mount in BloomSight palette</span>
+        <span>Apply themed palette to shares</span>
       </label>
       <label class="toggle">
         <input type="checkbox" id="downsample" checked />
-        <span>Press reveal to original resolution</span>
+        <span>Downsample reveal to original resolution</span>
       </label>
       <div class="actions">
-        <button class="btn" id="encrypt-btn" disabled>Press into specimens</button>
-        <button class="btn ghost" id="reset-btn" type="button">Begin a new folio</button>
+        <button class="btn" id="encrypt-btn" disabled>Generate shares</button>
+        <button class="btn ghost" id="reset-btn" type="button">Reset</button>
       </div>
       <div class="vine" id="vine" aria-hidden="true">
         <svg viewBox="0 0 600 56" preserveAspectRatio="none">
@@ -87,16 +81,16 @@
   </div>
 
   <section class="section-rule">
-    <h2>II &mdash; Mounted Specimens</h2><div class="ornament"></div>
+    <h2>2 &mdash; Generated shares</h2><div class="ornament"></div>
   </section>
   <div class="specimens" id="specimens"></div>
 
   <section class="section-rule">
-    <h2>III &mdash; Stacking Plate</h2><div class="ornament"></div>
+    <h2>3 &mdash; Reveal by stacking</h2><div class="ornament"></div>
   </section>
   <div class="plate" id="plate" hidden>
     <div class="plate-instructions" id="plate-instructions">
-      Drag the right specimen onto the left to overlay the transparencies.
+      Drag share 2 onto share 1 to overlay them.
     </div>
     <div class="stage" id="stage">
       <canvas class="base" id="base-canvas"></canvas>
@@ -113,22 +107,21 @@
   </div>
 
   <div class="reveal-card" id="reveal-card">
-    <h3>Recovered specimen</h3>
+    <h3>Recovered image</h3>
     <div class="row">
       <img id="reveal-img" alt="Recovered image" />
       <div>
         <p style="margin:0 0 .4rem;font-style:italic;color:var(--ink-soft);">
-          The transparencies have aligned. Beneath them, the original
-          plate is restored.
+          Shares aligned. Original image reconstructed.
         </p>
-        <a class="btn ghost" id="download-link" download="recovered.png">Download plate</a>
+        <a class="btn ghost" id="download-link" download="recovered.png">Download</a>
       </div>
     </div>
   </div>
 </main>
 
 <footer>
-  Pressed in the BloomSight greenhouse &middot; <span id="footer-year"></span>
+  BloomSight Visual Cryptography &middot; <span id="footer-year"></span>
 </footer>
 
 <div class="toast" id="toast" role="status"></div>

@@ -1,25 +1,15 @@
-/* BloomSight Herbarium - app glue. */
+/* BloomSight - app glue. */
 
 (function () {
   const $ = function (id) { return document.getElementById(id); };
   const state = { dataURL: null, lastShares: null, stacking: null };
 
-  /* ---- Date / footer / season -------------------------------------- */
+  /* ---- Date / footer ----------------------------------------------- */
   const fmt = new Intl.DateTimeFormat("en", {
     day: "2-digit", month: "long", year: "numeric"
   });
   $("folio-date").textContent = fmt.format(new Date());
   $("footer-year").textContent = new Date().getFullYear();
-
-  document.querySelectorAll("[data-set-season]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      const s = b.getAttribute("data-set-season");
-      document.documentElement.setAttribute("data-season", s);
-      document.querySelectorAll("[data-set-season]").forEach(function (x) {
-        x.setAttribute("aria-pressed", x === b ? "true" : "false");
-      });
-    });
-  });
 
   /* ---- Method selector --------------------------------------------- */
   const methodEl = $("method");
@@ -78,16 +68,14 @@
       const card = document.createElement("article");
       card.className = "specimen mounted";
       card.style.animationDelay = (i * 0.18) + "s";
-      const latin = payload.method === "naor-shamir"
-        ? "Cryptus stackensis var. " + ["alba", "bruna", "viridis", "aurea"][i % 4]
-        : "Cryptus aleatorius cv. " + (i + 1);
+      const title = "Share " + (i + 1) + " / " + payload.shares.length;
       card.innerHTML =
         '<span class="pin tl"></span><span class="pin tr"></span>' +
         '<span class="pin bl"></span><span class="pin br"></span>' +
         '<div class="frame"><img alt="Share ' + (i + 1) + '" src="' + sh.image + '"/></div>' +
         '<div class="label">' +
-        '  <div><span class="latin">' + latin + '</span><br/>Specimen No. ' + sh.index + '</div>' +
-        '  <div class="meta">' + sh.width + ' &times; ' + sh.height + '<br/>' + today + '<br/>' + payload.method + '</div>' +
+        '  <div><span class="latin">' + title + '</span><br/>Method: ' + payload.method + '</div>' +
+        '  <div class="meta">' + sh.width + ' &times; ' + sh.height + ' px<br/>' + today + '<br/>themed: ' + payload.themed + '</div>' +
         '</div>' + ornamentFor(sh.image.slice(-32) + i);
       host.appendChild(card);
     });
@@ -123,7 +111,7 @@
       $("reveal-img").src = res.image;
       $("download-link").href = res.image;
       $("reveal-card").classList.add("shown");
-      $("plate-instructions").textContent = "The transparencies have aligned.";
+      $("plate-instructions").textContent = "Shares aligned. Image recovered.";
     } catch (e) { showToast(e.message); }
   }
 

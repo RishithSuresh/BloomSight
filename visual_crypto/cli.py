@@ -17,7 +17,7 @@ from typing import List, Optional, Sequence
 
 from PIL import Image, ImageDraw, ImageFont
 
-from . import naor_shamir, theme, xor
+from . import integrity, naor_shamir, theme, xor
 
 _METHODS = ("xor", "naor-shamir")
 
@@ -33,12 +33,17 @@ def _save_share(share: Image.Image, path: Path, themed: bool, index: int) -> Non
 def _load_share_for_method(path: Path, method: str) -> Image.Image:
     img = Image.open(path)
     img.load()
+    
+    # De-theme if necessary (convert RGB back to original grayscale/binary)
+    # This applies to any method if the share was saved with theming
+    if img.mode in ("RGB", "RGBA"):
+        img = theme.from_nature_tint(img)
+    
     if method == "naor-shamir":
-        # Themed tint -> de-tint via luminance threshold; native 1-bit
-        # or grayscale shares are returned in mode "L" without dithering.
-        if img.mode in ("RGB", "RGBA"):
-            return theme.from_nature_tint(img)
-        return img.convert("L")
+        # Ensure naor-shamir shares are in "L" mode
+        if img.mode not in ("L", "1"):
+            img = img.convert("L")
+    
     return img
 
 
@@ -56,19 +61,90 @@ def _cmd_encrypt(args: argparse.Namespace) -> int:
         s1, s2 = naor_shamir.naor_shamir_encrypt(src, seed=args.seed)
         shares = [s1, s2]
 
+    # Optionally embed metadata
+    if args.metadata:
+        shares = [
+            integrity.embed_metadata(
+                share, i, len(shares), threshold=args.threshold
+            )
+            for i, share in enumerate(shares)
+        ]
+
+    # Optionally sign shares (AFTER theming so signature matches saved file)
+    signatures = None
+    if args.key:
+        key = args.key.encode("utf-8")
+        signatures = {}
+        for i, share in enumerate(shares, start=1):
+            # Apply theming if needed to match what will be saved
+            signed_share = share
+            if args.themed:
+                fg, bg = theme.palette_for(i - 1)
+                signed_share = theme.apply_nature_tint(share, fg=fg, bg=bg)
+            signatures[i] = integrity.compute_share_signature(signed_share, key)
+
     for i, share in enumerate(shares, start=1):
         _save_share(share, out_dir / f"share_{i}.png", args.themed, i - 1)
+
+    # Save signatures if generated
+    if signatures:
+        sig_file = out_dir / "signatures.txt"
+        with open(sig_file, "w") as f:
+            for i in sorted(signatures.keys()):
+                f.write(f"share_{i}.png: {signatures[i]}\n")
 
     print(theme.banner("BloomSight - Encrypt"))
     print(f"  method  : {args.method}")
     print(f"  shares  : {len(shares)} -> {out_dir}")
     print(f"  themed  : {args.themed}")
+    if args.metadata:
+        print(f"  metadata: embedded (threshold={args.threshold})")
+    if signatures:
+        print(f"  signing : HMAC-SHA256 (signatures.txt)")
     return 0
 
 
 def _cmd_decrypt(args: argparse.Namespace) -> int:
     paths = [Path(p) for p in args.shares]
     images = [_load_share_for_method(p, args.method) for p in paths]
+
+    # Optionally verify signatures
+    if args.verify:
+        if not args.key:
+            raise SystemExit("--verify requires --key")
+        key = args.key.encode("utf-8")
+        # Load signatures from file if present
+        sig_file = paths[0].parent / "signatures.txt"
+        if not sig_file.exists():
+            raise SystemExit(f"Signature file not found: {sig_file}")
+        
+        signatures = {}
+        with open(sig_file) as f:
+            for line in f:
+                if ": " in line:
+                    filename, sig = line.strip().split(": ", 1)
+                    signatures[filename] = sig
+        
+        all_valid = True
+        for i, path in enumerate(paths):
+            filename = path.name
+            if filename not in signatures:
+                print(f"  WARNING: No signature for {filename}")
+                all_valid = False
+                continue
+            
+            # Load the PNG and compute signature as-is (preserve theming)
+            png_img = Image.open(path)
+            png_img.load()
+            expected_sig = signatures[filename]
+            is_valid = integrity.verify_share_signature(png_img, key, expected_sig)
+            status = "✓" if is_valid else "✗"
+            print(f"  {status} {filename}")
+            if not is_valid:
+                all_valid = False
+        
+        if not all_valid:
+            raise SystemExit("Share verification failed: one or more shares tampered with")
 
     if args.method == "xor":
         recovered = xor.xor_decrypt(images)
@@ -84,6 +160,8 @@ def _cmd_decrypt(args: argparse.Namespace) -> int:
     recovered.save(out_path)
 
     print(theme.banner("BloomSight - Decrypt"))
+    if args.verify:
+        print(f"  verification: passed")
     print(f"  method   : {args.method}")
     print(f"  combined : {len(images)} share(s)")
     print(f"  output   : {out_path}")
@@ -147,6 +225,12 @@ def build_parser() -> argparse.ArgumentParser:
     enc.add_argument("--themed", action="store_true",
                      help="paint shares with the BloomSight palette")
     enc.add_argument("--seed", type=int, default=None)
+    enc.add_argument("--key", type=str, default=None,
+                     help="secret key for HMAC signing shares (enables integrity verification)")
+    enc.add_argument("--metadata", action="store_true",
+                     help="embed share index and threshold info in top-left corner")
+    enc.add_argument("--threshold", type=int, default=0,
+                     help="threshold value to encode in metadata (0 = not applicable)")
     enc.set_defaults(func=_cmd_encrypt)
 
     dec = sub.add_parser("decrypt", help="combine shares")
@@ -155,6 +239,10 @@ def build_parser() -> argparse.ArgumentParser:
     dec.add_argument("--method", "-m", choices=_METHODS, default="xor")
     dec.add_argument("--downsample", action="store_true",
                      help="for naor-shamir: collapse 2x2 sub-blocks back")
+    dec.add_argument("--verify", action="store_true",
+                     help="verify share signatures before decryption")
+    dec.add_argument("--key", type=str, default=None,
+                     help="secret key for verifying share signatures")
     dec.set_defaults(func=_cmd_decrypt)
 
     demo = sub.add_parser("demo", help="run a full encrypt/decrypt example")

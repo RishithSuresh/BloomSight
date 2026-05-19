@@ -131,6 +131,40 @@
 }
 @keyframes grow { to { stroke-dashoffset: 0; } }
 
+.seed-field { margin-top: .4rem; }
+.seed-row {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+}
+.seed-row input { flex: 1 1 auto; }
+.btn.compact {
+  font-size: .95rem;
+  padding: .5rem 1rem;
+}
+.run-meta {
+  margin: .85rem 0 0;
+  color: var(--ink-soft);
+  font-size: .95rem;
+  font-style: italic;
+}
+.specimens-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: .3rem 0 1rem;
+}
+.specimen-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: .5rem;
+  margin-top: .35rem;
+  flex-wrap: wrap;
+}
+.specimen-actions .btn {
+  font-size: .95rem;
+  padding: .42rem .9rem;
+}
+
 /* ===== Reveal banner ================================================= */
 .reveal-card {
   margin-top: 2rem; padding: 1.6rem; background: var(--bg-paper);

@@ -98,10 +98,22 @@
               <input type="checkbox" id="downsample" checked />
               <span>Downsample reveal to original resolution</span>
             </label>
+            <label class="toggle">
+              <input type="checkbox" id="use-seed" />
+              <span>Use deterministic seed (reproducible shares)</span>
+            </label>
+            <div class="field seed-field" id="seed-field" hidden>
+              <label for="seed">Seed value</label>
+              <div class="seed-row">
+                <input id="seed" type="number" min="0" step="1" placeholder="e.g. 42" />
+                <button class="btn ghost compact" id="seed-random-btn" type="button">Random</button>
+              </div>
+            </div>
             <div class="actions">
               <button class="btn" id="encrypt-btn" disabled>Generate shares</button>
               <button class="btn ghost" id="reset-btn" type="button">Reset</button>
             </div>
+            <p class="run-meta" id="run-meta">Choose an image to start. Tip: press Ctrl/Cmd + Enter to generate.</p>
             <div class="vine" id="vine" aria-hidden="true">
               <svg viewBox="0 0 600 56" preserveAspectRatio="none">
                 <path class="stroke" d="M5 40 C 80 10, 140 60, 220 30 S 360 10, 440 36 S 560 56, 595 22"/>
@@ -116,6 +128,9 @@
         <section class="section-rule">
           <h2>2 &mdash; Generated shares</h2><div class="ornament"></div>
         </section>
+        <div class="specimens-toolbar">
+          <button class="btn ghost" id="download-all-btn" type="button" disabled>Download all shares</button>
+        </div>
         <div class="specimens" id="specimens"></div>
       </section>
 

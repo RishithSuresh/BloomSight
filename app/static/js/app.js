@@ -2,7 +2,7 @@
 
 (function () {
   const $ = function (id) { return document.getElementById(id); };
-  const state = { dataURL: null, lastShares: null, stacking: null };
+  const state = { dataURL: null, fileName: null, lastShares: null, stacking: null };
   const panels = Array.prototype.slice.call(document.querySelectorAll(".workflow-panel"));
   const panelButtons = Array.prototype.slice.call(document.querySelectorAll("[data-panel-target]"));
   const sidebar = $("sidebar");
@@ -66,9 +66,34 @@
   const methodEl = $("method");
   function syncMethod() {
     $("shares-field").hidden = methodEl.value !== "xor";
+    updateRunMeta();
   }
   methodEl.addEventListener("change", syncMethod);
   syncMethod();
+
+  const useSeedEl = $("use-seed");
+  const seedEl = $("seed");
+  function syncSeedField() {
+    $("seed-field").hidden = !useSeedEl.checked;
+    updateRunMeta();
+  }
+  useSeedEl.addEventListener("change", syncSeedField);
+  syncSeedField();
+
+  function readSeed() {
+    if (!useSeedEl.checked) return null;
+    const parsed = parseInt(seedEl.value, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  function updateRunMeta(msg) {
+    const suffix = useSeedEl.checked
+      ? " deterministic seed " + readSeed() + " is active."
+      : " random seed is active.";
+    $("run-meta").textContent = msg || (state.dataURL
+      ? "Input ready" + (state.fileName ? ": " + state.fileName : "") + ";" + suffix
+      : "Choose an image to start. Tip: press Ctrl/Cmd + Enter to generate.");
+  }
 
   /* ---- Drop zone --------------------------------------------------- */
   const dz = $("dropzone"), fileInput = $("file"), preview = $("preview");
@@ -76,8 +101,10 @@
     if (!file || !file.type.startsWith("image/")) return;
     BS.api.fileToDataURL(file).then(function (url) {
       state.dataURL = url;
+      state.fileName = file.name || "input-image";
       preview.src = url; preview.hidden = false;
       $("encrypt-btn").disabled = false;
+      updateRunMeta();
     });
   }
   dz.addEventListener("dragover",  function (e) { e.preventDefault(); dz.classList.add("is-hover"); });
@@ -87,6 +114,12 @@
     if (e.dataTransfer.files[0]) acceptFile(e.dataTransfer.files[0]);
   });
   fileInput.addEventListener("change", function (e) { acceptFile(e.target.files[0]); });
+  $("seed-random-btn").addEventListener("click", function () {
+    seedEl.value = String(Math.floor(Math.random() * 1_000_000_000));
+    useSeedEl.checked = true;
+    syncSeedField();
+  });
+  seedEl.addEventListener("input", updateRunMeta);
 
   /* ---- Toast / errors ---------------------------------------------- */
   const toast = $("toast");
@@ -127,14 +160,34 @@
         '<div class="label">' +
         '  <div><span class="latin">' + title + '</span><br/>Method: ' + payload.method + '</div>' +
         '  <div class="meta">' + sh.width + ' &times; ' + sh.height + ' px<br/>' + today + '<br/>themed: ' + payload.themed + '</div>' +
+        '  <div class="specimen-actions">' +
+        '    <a class="btn ghost" href="' + sh.image + '" download="share-' + (i + 1) + '-themed.png">Download themed</a>' +
+        '    <a class="btn ghost" href="' + sh.raw + '" download="share-' + (i + 1) + '-raw.png">Download raw</a>' +
+        "  </div>" +
         '</div>' + ornamentFor(sh.image.slice(-32) + i);
       host.appendChild(card);
     });
+    $("download-all-btn").disabled = payload.shares.length === 0;
     panelButtons.forEach(function (button) {
       if (button.getAttribute("data-panel-target") === "shares") button.disabled = false;
       if (button.getAttribute("data-panel-target") === "reveal") button.disabled = false;
     });
   }
+
+  $("download-all-btn").addEventListener("click", function () {
+    if (!state.lastShares || !state.lastShares.shares) return;
+    state.lastShares.shares.forEach(function (share, index) {
+      const themed = document.createElement("a");
+      themed.href = share.image;
+      themed.download = "share-" + (index + 1) + "-themed.png";
+      themed.click();
+      const raw = document.createElement("a");
+      raw.href = share.raw;
+      raw.download = "share-" + (index + 1) + "-raw.png";
+      raw.click();
+    });
+    showToast("Downloading themed and raw versions of all shares.");
+  });
 
   /* ---- Mount the stacking plate (Naor-Shamir only) ----------------- */
   async function mountPlate(payload) {
@@ -183,6 +236,7 @@
         method: methodEl.value,
         n_shares: parseInt($("shares").value, 10) || 2,
         themed: $("themed").checked,
+        seed: readSeed(),
       });
       state.lastShares = payload;
       renderSpecimens(payload);
@@ -190,8 +244,10 @@
       $("reveal-card").classList.remove("shown");
       await mountPlate(payload);
       if (payload.method === "xor") showRecovered(payload);
+      updateRunMeta("Generated " + payload.shares.length + " share(s).");
     } catch (e) {
       showToast(e.message);
+      updateRunMeta("Could not generate shares: " + e.message);
     } finally {
       $("encrypt-btn").disabled = false;
     }
@@ -199,19 +255,32 @@
 
   /* ---- Reset ------------------------------------------------------- */
   $("reset-btn").addEventListener("click", function () {
-    state.dataURL = null; state.lastShares = null;
+    state.dataURL = null; state.fileName = null; state.lastShares = null;
     preview.hidden = true; preview.src = ""; fileInput.value = "";
     $("specimens").innerHTML = "";
     $("plate").hidden = true;
     $("reveal-card").classList.remove("shown");
     $("encrypt-btn").disabled = true;
+    $("download-all-btn").disabled = true;
+    useSeedEl.checked = false;
+    seedEl.value = "";
+    syncSeedField();
     panelButtons.forEach(function (button) {
       const target = button.getAttribute("data-panel-target");
       button.disabled = target !== "input";
     });
     setPanel("input");
+    updateRunMeta();
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !$("encrypt-btn").disabled) {
+      event.preventDefault();
+      $("encrypt-btn").click();
+    }
   });
 
   setPanel("input");
   setSidebarCollapsed(false);
+  updateRunMeta();
 })();

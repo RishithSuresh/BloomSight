@@ -8,6 +8,8 @@
   const sidebar = $("sidebar");
   const sidebarToggle = $("sidebar-toggle");
   const sidebarFab = $("sidebar-fab");
+  const MAX_SEED_VALUE = 1_000_000_000;
+  const DOWNLOAD_DELAY_MS = 140; // Stagger downloads so browsers are less likely to block bursts.
   let activePanel = "input";
 
   function setSidebarCollapsed(collapsed) {
@@ -82,17 +84,30 @@
 
   function readSeed() {
     if (!useSeedEl.checked) return null;
+    if (seedEl.value.trim() === "") return null;
     const parsed = parseInt(seedEl.value, 10);
-    return Number.isFinite(parsed) ? parsed : 0;
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   function updateRunMeta(msg) {
-    const suffix = useSeedEl.checked
-      ? " deterministic seed " + readSeed() + " is active."
-      : " random seed is active.";
-    $("run-meta").textContent = msg || (state.dataURL
-      ? "Input ready" + (state.fileName ? ": " + state.fileName : "") + ";" + suffix
-      : "Choose an image to start. Tip: press Ctrl/Cmd + Enter to generate.");
+    if (msg) {
+      $("run-meta").textContent = msg;
+      return;
+    }
+    if (!state.dataURL) {
+      $("run-meta").textContent = "Choose an image to start. Tip: press Ctrl/Cmd + Enter to generate.";
+      return;
+    }
+    if (useSeedEl.checked) {
+      const seed = readSeed();
+      if (seed === null) {
+        $("run-meta").textContent = "Input ready: " + (state.fileName || "selected image") + ". Enter a numeric deterministic seed.";
+        return;
+      }
+      $("run-meta").textContent = "Input ready: " + (state.fileName || "selected image") + ". Deterministic seed " + seed + " is active.";
+      return;
+    }
+    $("run-meta").textContent = "Input ready: " + (state.fileName || "selected image") + ". Random seed is active.";
   }
 
   /* ---- Drop zone --------------------------------------------------- */
@@ -114,12 +129,21 @@
     if (e.dataTransfer.files[0]) acceptFile(e.dataTransfer.files[0]);
   });
   fileInput.addEventListener("change", function (e) { acceptFile(e.target.files[0]); });
+  function createSeedValue() {
+    if (window.crypto && window.crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      window.crypto.getRandomValues(buf);
+      return String(buf[0]);
+    }
+    console.warn("crypto.getRandomValues unavailable; falling back to Math.random for seed generation.");
+    return String(Math.floor(Math.random() * MAX_SEED_VALUE));
+  }
   $("seed-random-btn").addEventListener("click", function () {
-    seedEl.value = String(Math.floor(Math.random() * 1_000_000_000));
+    seedEl.value = createSeedValue();
     useSeedEl.checked = true;
     syncSeedField();
   });
-  seedEl.addEventListener("input", updateRunMeta);
+  seedEl.addEventListener("change", updateRunMeta);
 
   /* ---- Toast / errors ---------------------------------------------- */
   const toast = $("toast");
@@ -176,15 +200,20 @@
 
   $("download-all-btn").addEventListener("click", function () {
     if (!state.lastShares || !state.lastShares.shares) return;
+    const files = [];
     state.lastShares.shares.forEach(function (share, index) {
-      const themed = document.createElement("a");
-      themed.href = share.image;
-      themed.download = "share-" + (index + 1) + "-themed.png";
-      themed.click();
-      const raw = document.createElement("a");
-      raw.href = share.raw;
-      raw.download = "share-" + (index + 1) + "-raw.png";
-      raw.click();
+      files.push({ href: share.image, name: "share-" + (index + 1) + "-themed.png" });
+      files.push({ href: share.raw, name: "share-" + (index + 1) + "-raw.png" });
+    });
+    files.forEach(function (file, idx) {
+      setTimeout(function () {
+        const link = document.createElement("a");
+        link.href = file.href;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }, idx * DOWNLOAD_DELAY_MS);
     });
     showToast("Downloading themed and raw versions of all shares.");
   });
@@ -231,12 +260,16 @@
     vine.classList.remove("is-growing"); void vine.offsetWidth; vine.classList.add("is-growing");
     $("encrypt-btn").disabled = true;
     try {
+      const seed = readSeed();
+      if (useSeedEl.checked && seed === null) {
+        throw new Error("Please enter a numeric seed value.");
+      }
       const payload = await BS.api.encrypt({
         image: state.dataURL,
         method: methodEl.value,
         n_shares: parseInt($("shares").value, 10) || 2,
         themed: $("themed").checked,
-        seed: readSeed(),
+        seed: seed,
       });
       state.lastShares = payload;
       renderSpecimens(payload);
